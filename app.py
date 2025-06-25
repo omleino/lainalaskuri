@@ -1,15 +1,16 @@
 import streamlit as st
 import pandas as pd
 
-st.title("Taloyhtiön lainalaskuri – tasalyhenteinen laina")
+st.set_page_config(page_title="Taloyhtiön lainalaskuri", layout="centered")
+st.title("🏢 Taloyhtiön lainalaskuri – tasalyhenteinen laina")
 
 # Käyttäjän syötteet
 neliot = st.number_input("Maksavat neliöt (m²)", min_value=1, value=1000)
-investointi = st.number_input("Investoinnin suuruus (€)", min_value=0.0, value=500000.0)
-korko_prosentti = st.number_input("Korko (%)", min_value=0.0, value=4.0)
+investointi = st.number_input("Investoinnin suuruus (€)", min_value=0.0, value=500000.0, step=10000.0)
+korko_prosentti = st.number_input("Korko (%)", min_value=0.0, value=4.0, step=0.1, format="%.1f")
 vuodet = st.number_input("Takaisinmaksuaika (vuotta)", min_value=1, max_value=25, value=20)
 
-# Lasketaan
+# Laskenta
 korko = korko_prosentti / 100
 lainamaara_per_nelio = investointi / neliot
 vuosittainen_lyhennys = investointi / vuodet
@@ -37,17 +38,16 @@ for vuosi in range(1, 26):
     })
 
 df = pd.DataFrame(data)
-
 kokonaiskustannus_per_nelio = df["Pääoma €/m²/vuosi"].sum() + df["Korko €/m²/vuosi"].sum()
 
-# Näytetään tulokset
-st.subheader("Yhteenveto")
+# Näyttö
+st.subheader("📊 Yhteenveto")
 st.markdown(f"**Investointi per m²:** {lainamaara_per_nelio:.2f} €")
 st.markdown(f"**Kokonaiskustannus per m² (sis. korot):** {kokonaiskustannus_per_nelio:.2f} €")
 
-st.subheader("Vuosittaiset vastikkeet per m²")
+st.subheader("📅 Vuosittaiset vastikkeet per m²")
 st.dataframe(df.style.format({
     "Pääoma €/m²/vuosi": "{:.2f}",
     "Korko €/m²/vuosi": "{:.2f}",
     "Vastike €/m²/kk": "{:.2f}"
-}))
+}), use_container_width=True)
